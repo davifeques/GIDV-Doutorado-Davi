@@ -52,6 +52,20 @@
   .fade-in{animation:fadeIn .4s ease forwards}
   @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   @media(max-width:480px){.container{padding:28px 16px}h1{font-size:36px}h2{font-size:18px}.econ-grid{flex-direction:column}}
+
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:'▸';margin-right:4px;transition:transform .2s}
+  details[open] summary::before{content:'▾'}
+
+  @media print{
+    body{background:#0F1923 !important;color:#E8EDF2 !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+    .container{max-width:100%;padding:20px}
+    .btn-primary,.btn-secondary{display:none !important}
+    .result-card{break-inside:avoid;border-color:#243447 !important}
+    .econ-card{border-color:#24344766 !important}
+    details{break-inside:avoid}
+    details[open] summary~div{display:block !important}
+  }
 </style>
 </head>
 <body>
@@ -254,9 +268,25 @@ function showResults(){
       </div>
       <div class="econ-grid">
         <div class="econ-card" style="border:1px solid #27AE6033"><div class="econ-title"><span style="color:#27AE60">💰</span> Economia potencial</div><div class="econ-label">Cenário otimista (-25% lesões)</div><div class="econ-value" style="color:#27AE60">${budget.saving}</div></div>
-        <div class="econ-card" style="border:1px solid #2E86DE33"><div class="econ-title"><span style="color:#2E86DE">📈</span> ROI estimado</div><div class="econ-label">Retorno por R$1 investido</div><div class="econ-value" style="color:#2E86DE">${budget.roi}</div></div>
+        <div class="econ-card" style="border:1px solid #2E86DE33"><div class="econ-title"><span style="color:#2E86DE">📈</span> ROI estimado</div><div class="econ-label">Retorno por R$1 investido no sistema</div><div class="econ-value" style="color:#2E86DE">${budget.roi}</div></div>
       </div>
-      <p style="font-size:11px;color:var(--subtle);margin-top:14px;font-style:italic">Fonte: Dados do Brasileirão Série A (2019-2025). Premissa: 15 dias de afastamento médio/lesão.${answers.division&&!answers.division.includes('Série A')?' Os valores acima são referências da Série A. Para o contexto do seu clube na '+answers.division+', os valores absolutos serão proporcionalmente menores, mas a lógica do modelo (reduzir lesões = economia + performance) se aplica da mesma forma.':''}</p>
+
+      <details style="margin-top:16px;background:var(--dark3);border-radius:10px;padding:4px 0">
+        <summary style="padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);list-style:none;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">📐</span> Como esses valores são calculados?
+        </summary>
+        <div style="padding:4px 16px 16px;font-size:12px;line-height:1.7;color:var(--text)">
+          <p style="margin-bottom:10px"><strong style="color:var(--accent)">Custo por lesão:</strong> salário diário médio do elenco na faixa × 15 dias de afastamento (premissa baseada na literatura epidemiológica internacional).</p>
+          <p style="margin-bottom:10px"><strong style="color:var(--accent)">Custo total:</strong> média de 35 lesões/temporada na Série A (2019-2025) × custo por lesão da faixa.</p>
+          <p style="margin-bottom:10px"><strong style="color:var(--accent)">Economia potencial:</strong> compara o cenário atual (35 lesões) com o cenário otimista (26 lesões), ou seja, redução de 25% — premissa conservadora baseada em estudos que reportaram reduções de 20-30% com monitoramento estruturado. As 9 lesões evitadas geram:<br>
+          • <strong>Economia direta:</strong> 9 lesões × custo médio por lesão da faixa.<br>
+          • <strong>Ganho indireto:</strong> com base no coeficiente da pesquisa (~12 lesões = 1 posição na tabela), 9 lesões evitadas representam ganho de 0,75 posição, multiplicado pelo valor da cota de desempenho por posição na faixa do clube.</p>
+          <p style="margin-bottom:10px"><strong style="color:var(--accent)">ROI:</strong> economia potencial total ÷ custo anual do sistema vestível (R$ 400-700 mil, incluindo dispositivos, licenças de software, dashboards e suporte técnico).</p>
+          <p style="color:var(--subtle);font-style:italic;margin-bottom:0"><strong>Nota de transparência:</strong> o ROI considera apenas o custo do sistema vestível. Não inclui investimento em pessoal dedicado (analista de desempenho, fisiologista adicional), cujo custo varia significativamente entre clubes. Se incluído, o ROI real seria menor, mas a análise se mantém positiva.</p>
+        </div>
+      </details>
+
+      <p style="font-size:11px;color:var(--subtle);margin-top:14px;font-style:italic">Fonte: Dados do Brasileirão Série A (2019-2025), Transfermarkt e Sports Value. Premissa: 15 dias de afastamento médio/lesão.${answers.division&&!answers.division.includes('Série A')?' Os valores são referências da Série A. Para o contexto do seu clube na '+answers.division+', os valores absolutos serão proporcionalmente menores, mas a lógica do modelo se aplica da mesma forma.':''}</p>
       `}
     </div>
     <div class="result-card fade-in" style="border-color:#27AE6033">
@@ -269,7 +299,11 @@ function showResults(){
       <p style="font-size:12px;color:var(--subtle);margin-top:10px">Contato: davi.vale@cesar.school | davifeva@gmail.com</p>
     </div>
     <button class="btn-primary" onclick="startDiagnostic()" style="margin-bottom:12px">Refazer diagnóstico</button>
-    <button class="btn-secondary" onclick="window.print()" style="width:100%;text-align:center">Imprimir / Salvar como PDF</button>
+    <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--accent);margin-bottom:12px;text-align:center">
+      <p style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:8px">📥 Salve seu resultado!</p>
+      <p style="font-size:12px;color:var(--subtle);margin-bottom:12px;line-height:1.5">Clique no botão abaixo para gerar um PDF com o seu diagnóstico completo. Depois, envie esse PDF para o pesquisador Davi Vale.</p>
+      <button class="btn-secondary" onclick="window.print()" style="width:100%;text-align:center;margin-top:0;border-color:var(--accent);color:var(--accent)">Salvar como PDF / Imprimir</button>
+    </div>
     <div style="height:40px"></div>`;
 
   setTimeout(()=>{document.querySelectorAll('.pillar-bar-fill').forEach(bar=>{setTimeout(()=>{bar.style.width=bar.dataset.target+'%'},parseInt(bar.dataset.delay))})},400);
