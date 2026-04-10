@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GIDV — Diagnóstico de Maturidade</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--dark:#0F1923;--dark2:#1A2A3A;--dark3:#243447;--card:#162232;--accent:#2E86DE;--green:#27AE60;--yellow:#F1C40F;--orange:#E67E22;--red:#E74C3C;--purple:#8E44AD;--text:#E8EDF2;--subtle:#7B8FA3}
+  body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--dark);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+  .container{max-width:620px;margin:0 auto;padding:40px 24px}
+  .screen{display:none}.screen.active{display:block}
+  .progress-wrap{width:100%;height:4px;background:var(--dark3);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:2px;transition:width .5s ease}
+  .progress-label{margin-top:10px;font-size:12px;color:var(--subtle);display:flex;justify-content:space-between;align-items:center}
+  .tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.5px}
+  .btn-primary{width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--green));color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:transform .15s,box-shadow .15s}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,134,222,.3)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-secondary{padding:10px 20px;background:transparent;border:1px solid var(--dark3);border-radius:8px;color:var(--subtle);font-size:13px;cursor:pointer;font-family:inherit;margin-top:20px;transition:border-color .2s}
+  .btn-secondary:hover{border-color:var(--subtle)}
+  .option-card{padding:16px 20px;background:var(--card);border:1.5px solid var(--dark3);border-radius:12px;color:var(--text);font-size:14px;text-align:left;cursor:pointer;transition:all .2s;margin-bottom:10px;display:flex;align-items:center;gap:12px;width:100%;font-family:inherit;line-height:1.5}
+  .option-card:hover{border-color:var(--accent);background:rgba(46,134,222,.08)}
+  .option-card.selected{border-color:var(--accent);background:rgba(46,134,222,.12)}
+  .option-num{width:28px;height:28px;border-radius:50%;background:var(--dark3);color:var(--subtle);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:all .2s}
+  .option-card.selected .option-num,.option-card:hover .option-num{background:var(--accent);color:#fff}
+  .intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+  .intro-card{background:var(--card);border-radius:10px;padding:14px 12px;text-align:center;border:1px solid var(--dark3)}
+  .intro-card-icon{font-size:22px;margin-bottom:6px}.intro-card-text{font-size:12px;color:var(--subtle)}
+  .result-card{background:var(--card);border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid var(--dark3)}
+  .result-card-title{font-size:13px;font-weight:600;color:var(--subtle);margin-bottom:16px;letter-spacing:.5px;text-transform:uppercase}
+  .gauge{display:flex;gap:6px;align-items:flex-end;justify-content:center;margin:20px 0}
+  .gauge-bar{border-radius:6px;transition:all .6s ease;transform-origin:bottom}
+  .gauge-label{font-size:11px;text-align:center;margin-top:6px}
+  .pillar-row{margin-bottom:22px}
+  .pillar-header{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;font-weight:600}
+  .pillar-bar-bg{height:8px;background:var(--dark3);border-radius:4px;overflow:hidden}
+  .pillar-bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+  .pillar-rec{margin-top:10px;padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.6;border-left:3px solid}
+  .econ-grid{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .econ-card{background:var(--card);border-radius:12px;padding:20px;flex:1;min-width:200px}
+  .econ-title{font-size:13px;color:var(--subtle);margin-bottom:8px;font-weight:600;letter-spacing:.5px}
+  .econ-label{font-size:11px;color:var(--subtle)}.econ-value{font-size:20px;font-weight:700;font-family:'JetBrains Mono','Fira Code',monospace}
+  .rec-item{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+  .rec-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+  .rec-text{font-size:14px;line-height:1.5}
+  .final-box{border-radius:16px;padding:24px;margin-bottom:20px;text-align:center}
+  .evolution-box{margin-top:16px;padding:16px;border-radius:10px;border:1px dashed;font-size:13px;line-height:1.6}
+  h1{font-size:48px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+  h2{font-size:22px;font-weight:700;margin-top:32px;margin-bottom:24px;line-height:1.3}
+  .fade-in{animation:fadeIn .4s ease forwards}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:480px){.container{padding:28px 16px}h1{font-size:36px}h2{font-size:18px}.econ-grid{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="screen-intro" class="screen active">
+    <div style="text-align:center" class="fade-in">
+      <div class="tag" style="background:rgba(46,134,222,.15);color:var(--accent);margin-bottom:20px">DOUTORADO PROFISSIONAL • CESAR SCHOOL</div>
+      <h1><span style="color:var(--accent)">GIDV</span></h1>
+      <p style="font-size:16px;color:var(--subtle);margin:8px 0 4px">Gestão Integrada de Dados Vestíveis</p>
+      <div style="width:60px;height:3px;background:var(--accent);margin:16px auto;border-radius:2px"></div>
+    </div>
+    <p style="font-size:15px;line-height:1.7;margin-bottom:28px;text-align:left" class="fade-in">
+      Este diagnóstico interativo avalia em qual <strong>nível de maturidade</strong> o seu clube se encontra na
+      utilização de tecnologias vestíveis e projeta o <strong>impacto econômico</strong> que uma gestão estruturada
+      de dados pode gerar.
+    </p>
+    <div class="intro-grid fade-in">
+      <div class="intro-card"><div class="intro-card-icon">📊</div><div class="intro-card-text">8 perguntas diagnósticas</div></div>
+      <div class="intro-card"><div class="intro-card-icon">🎯</div><div class="intro-card-text">Nível de maturidade</div></div>
+      <div class="intro-card"><div class="intro-card-icon">💰</div><div class="intro-card-text">Projeção econômica</div></div>
+      <div class="intro-card"><div class="intro-card-icon">📋</div><div class="intro-card-text">Recomendações por pilar</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--subtle);margin-bottom:24px;text-align:center" class="fade-in">Tempo estimado: 3-5 minutos. Suas respostas não são armazenadas.</p>
+    <button class="btn-primary fade-in" onclick="startDiagnostic()">Iniciar Diagnóstico →</button>
+  </div>
+
+  <div id="screen-questions" class="screen">
+    <div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+    <div class="progress-label"><span id="progressText"></span><span id="pillarTag"></span></div>
+    <h2 id="questionTitle"></h2>
+    <div id="optionsContainer"></div>
+    <button class="btn-secondary" id="btnBack" onclick="goBack()" style="display:none">← Voltar</button>
+  </div>
+
+  <div id="screen-results" class="screen"><div id="resultsContent"></div></div>
+</div>
+
+<script>
+const allQuestions=[
+  {id:"division",type:"info",pillar:"Contexto do Clube",pillarColor:"#7B8FA3",question:"Em qual divisão o clube atua?",options:[{label:"Série A"},{label:"Série B"},{label:"Série C / Inferior"},{label:"Categorias de Base"}]},
+  {id:"budget",type:"info",pillar:"Contexto do Clube",pillarColor:"#7B8FA3",question:"Qual a folha salarial mensal estimada do elenco profissional?",
+   optionsByDivision:{
+     "Série A":[{label:"Alta (acima de R$ 15 mi/mês — perfil Top 6)",budgetKey:"A"},{label:"Média (R$ 7 a 15 mi/mês — perfil 7º ao 12º)",budgetKey:"B"},{label:"Menor (R$ 3 a 7 mi/mês — perfil 13º ao 20º)",budgetKey:"C"},{label:"Não sei / Prefiro não informar",budgetKey:"C"}],
+     "Série B":[{label:"Acima de R$ 5 mi/mês",budgetKey:"B"},{label:"Entre R$ 2 e 5 mi/mês",budgetKey:"C"},{label:"Abaixo de R$ 2 mi/mês",budgetKey:"C"},{label:"Não sei / Prefiro não informar",budgetKey:"C"}],
+     "Série C / Inferior":[{label:"Acima de R$ 1 mi/mês",budgetKey:"C"},{label:"Abaixo de R$ 1 mi/mês",budgetKey:"C"},{label:"Não sei / Prefiro não informar",budgetKey:"C"}],
+     "Categorias de Base":[{label:"Clube com elenco profissional na Série A ou B",budgetKey:"B"},{label:"Clube com elenco profissional na Série C ou D",budgetKey:"C"},{label:"Somente categorias de base (sem elenco profissional)",budgetKey:"base"},{label:"Não sei / Prefiro não informar",budgetKey:"C"}]
+   }},
+  {id:"q1",type:"score",pillar:"Coleta & Infraestrutura",pillarColor:"#2E86DE",question:"O clube possui dispositivos vestíveis (GPS, acelerômetros)?",options:[{label:"Não possui nenhum dispositivo",score:0},{label:"Possui mas usa esporadicamente",score:1},{label:"Possui e usa em todos os treinos",score:2},{label:"Possui e usa em treinos e jogos com protocolo definido",score:3}]},
+  {id:"q2",type:"score",pillar:"Coleta & Infraestrutura",pillarColor:"#2E86DE",question:"Existe um profissional dedicado à gestão dos dados vestíveis?",options:[{label:"Não há profissional responsável",score:0},{label:"Um profissional acumula essa função com outras",score:1},{label:"Há um analista ou fisiologista dedicado",score:2},{label:"Há equipe multidisciplinar (analista + fisiologista + médico)",score:3}]},
+  {id:"q3",type:"score",pillar:"Processamento & Análise",pillarColor:"#8E44AD",question:"Como os dados coletados são processados e visualizados?",options:[{label:"Não são processados de forma estruturada",score:0},{label:"Relatórios manuais ou planilhas eventuais",score:1},{label:"Dashboard com métricas básicas (distância, velocidade)",score:2},{label:"Dashboard integrado com ACWR e múltiplas fontes",score:3}]},
+  {id:"q4",type:"score",pillar:"Processamento & Análise",pillarColor:"#8E44AD",question:"São calculadas métricas de razão aguda:crônica (ACWR) individuais?",options:[{label:"Não, apenas métricas absolutas",score:0},{label:"Sim, mas sem limiares definidos",score:1},{label:"Sim, com limiares padrão para o grupo",score:2},{label:"Sim, com limiares individualizados por atleta",score:3}]},
+  {id:"q5",type:"score",pillar:"Decisão & Ação",pillarColor:"#27AE60",question:"As métricas de carga influenciam as decisões de gestão do elenco?",options:[{label:"Não influenciam — decisões sem dados",score:0},{label:"Influenciam eventualmente quando há alerta grave",score:1},{label:"São consideradas no planejamento semanal",score:2},{label:"São parte obrigatória da decisão diária (protocolo formal)",score:3}]},
+  {id:"q6",type:"score",pillar:"Decisão & Ação",pillarColor:"#27AE60",question:"Existe um protocolo de comunicação entre performance e gestão?",options:[{label:"Não há comunicação estruturada",score:0},{label:"Comunicação informal quando necessário",score:1},{label:"Relatório diário enviado à comissão",score:2},{label:"Reunião diária + relatório + protocolo de decisão",score:3}]},
+  {id:"q7",type:"score",pillar:"Impacto & Sustentabilidade",pillarColor:"#E67E22",question:"O clube mensura a taxa de lesão e a disponibilidade do elenco?",options:[{label:"Não mensura de forma estruturada",score:0},{label:"Registra lesões mas sem análise sistemática",score:1},{label:"Acompanha taxa de lesão e dias de afastamento por temporada",score:2},{label:"Dashboard de disponibilidade com análise de tendência e custo",score:3}]},
+  {id:"q8",type:"score",pillar:"Impacto & Sustentabilidade",pillarColor:"#E67E22",question:"O impacto financeiro das lesões é calculado e reportado à diretoria?",options:[{label:"Não é calculado",score:0},{label:"Há noção qualitativa mas sem cálculo formal",score:1},{label:"Custo direto (salário em afastamento) é estimado",score:2},{label:"Custo direto + indireto (impacto em posição) são mensurados",score:3}]},
+];
+
+const maturityLevels=[
+  {level:1,name:"Reativo",color:"#E74C3C",subtitle:"Sem tecnologia vestível",desc:"Decisões baseadas em percepção subjetiva. Gestão de lesões reativa."},
+  {level:2,name:"Inicial",color:"#E67E22",subtitle:"Coleta básica, uso pontual",desc:"Possui vestíveis mas uso inconsistente. Dependência de indivíduo isolado."},
+  {level:3,name:"Estruturado",color:"#F1C40F",subtitle:"Monitoramento sistemático",desc:"Coleta diária com dashboard. Profissional dedicado. Uso variável pela comissão."},
+  {level:4,name:"Integrado",color:"#27AE60",subtitle:"Decisão multidisciplinar",desc:"Integração GPS + vídeo + bio. Protocolo operacional. Gestão usa dados."},
+  {level:5,name:"Preditivo",color:"#2E86DE",subtitle:"IA e antecipação de risco",desc:"Machine learning, biofeedback em tempo real, ROI mensurado e reportado."},
+];
+
+const pillarRecs={
+  "Coleta & Infraestrutura":{
+    low:"O clube ainda não possui a infraestrutura mínima para coleta de dados vestíveis. Recomenda-se avaliar fornecedores (Catapult, StatSports) e definir um profissional responsável. O investimento em hardware (R$ 400-700 mil/ano) é significativamente inferior ao impacto financeiro de lesões evitáveis.",
+    mid:"O clube já possui alguma infraestrutura, mas o uso ainda não é consistente. Formalizar um protocolo de coleta diária (treinos e jogos) e garantir que haja um profissional dedicado à gestão dos dados são os próximos passos para extrair valor real da tecnologia.",
+    high:"A infraestrutura de coleta está bem estabelecida. O foco agora deve ser garantir continuidade operacional (manutenção, calibração, backup) e explorar a integração com fontes complementares como bioquímica e questionários de wellness."},
+  "Processamento & Análise":{
+    low:"Os dados coletados não estão sendo transformados em informação útil. Considere investir em uma equipe ou profissional dedicado à análise de dados vestíveis. Um dashboard com métricas básicas (distância, HSR, ACWR) já permitiria identificar padrões de risco e embasar decisões de gestão.",
+    mid:"O clube já processa dados, mas há espaço para evoluir. Calcular ACWR com limiares individualizados por atleta, em vez de faixas genéricas, pode aumentar significativamente a capacidade de identificar riscos precocemente.",
+    high:"O processamento analítico está maduro. Próximos passos: integrar múltiplas fontes em plataforma unificada e explorar modelos preditivos combinando carga, sono, bioquímica e histórico de lesões."},
+  "Decisão & Ação":{
+    low:"As métricas disponíveis não estão sendo traduzidas em decisões concretas. O maior desafio geralmente é a falta de protocolo claro de comunicação entre performance e gestão. Definir quem informa, quem decide e quando é o primeiro passo.",
+    mid:"As informações chegam aos decisores, mas nem sempre de forma estruturada. Formalizar protocolo diário (relatório + reunião breve) e registrar decisões baseadas em dados cria um ciclo de aprendizado organizacional valioso.",
+    high:"O clube já opera com decisões baseadas em dados. Para evoluir, implemente registro histórico de decisões e resultados, criando base de conhecimento para avaliar a eficácia das intervenções ao longo do tempo."},
+  "Impacto & Sustentabilidade":{
+    low:"O clube não mensura o impacto financeiro das lesões, dificultando justificar investimentos em prevenção. Começar a registrar lesões, dias de afastamento e estimar o custo salarial já fornece dados concretos para apresentar à diretoria.",
+    mid:"O clube acompanha indicadores de saúde, mas não conecta ao impacto econômico. Estimar custo direto (salário em afastamento) e indireto (impacto na posição e receitas) fortalece o argumento para investimentos contínuos.",
+    high:"O clube mensura impacto em múltiplas dimensões. Próximo passo: reportar ROI do sistema vestível como indicador de gestão à diretoria, posicionando a tecnologia como investimento com retorno mensurável."}
+};
+
+const maturityEvolution={
+  1:{next:"Nível 2 — Inicial",suggestion:"O primeiro passo é adquirir dispositivos vestíveis e designar um profissional responsável. Avalie fornecedores, simule o custo-benefício e sensibilize a diretoria com os dados econômicos: o custo de não monitorar é significativamente maior que o investimento na tecnologia."},
+  2:{next:"Nível 3 — Estruturado",suggestion:"O foco deve ser na formalização: protocolo de coleta diária, dashboard com métricas-chave (ACWR, distância, HSR) e comunicação regular com a comissão técnica. A transição de uso pontual para sistemático é o que diferencia clubes que extraem valor da tecnologia."},
+  3:{next:"Nível 4 — Integrado",suggestion:"O clube monitora, mas precisa integrar. Conecte dados vestíveis com outras fontes (bioquímica, wellness, vídeo), formalize o protocolo interdisciplinar e comece a mensurar o custo financeiro das lesões. A integração transforma dados isolados em inteligência de gestão."},
+  4:{next:"Nível 5 — Preditivo",suggestion:"O clube opera em nível avançado. Para alcançar o estágio preditivo, explore modelos de machine learning para risco individual, implemente biofeedback em tempo real e estabeleça o ROI como indicador de gestão reportado à diretoria."},
+  5:{next:"Referência",suggestion:"O clube está na fronteira da inovação. Publique resultados, contribua para o avanço científico e apoie a evolução de clubes menores. Estabeleça o ciclo automatizado: dado → insight → ação → resultado → aprendizado."},
+};
+
+let currentQ=0, answers={};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+function startDiagnostic(){currentQ=0;answers={};showScreen('questions');renderQuestion()}
+
+function renderQuestion(){
+  const q=allQuestions[currentQ],total=allQuestions.length;
+  document.getElementById('progressBar').style.width=((currentQ/total)*100)+'%';
+  const isInfo=q.type==='info';
+  document.getElementById('progressText').textContent=isInfo?`Contexto do Clube — ${currentQ+1} de 2`:`Diagnóstico — ${currentQ-1} de ${total-2}`;
+  document.getElementById('pillarTag').innerHTML=`<span class="tag" style="background:${q.pillarColor}22;color:${q.pillarColor};border:1px solid ${q.pillarColor}44">${q.pillar}</span>`;
+  document.getElementById('questionTitle').textContent = q.id==='budget' && answers.division==='Categorias de Base' ? 'Qual a estrutura financeira do clube?' : q.question;
+  document.getElementById('questionTitle').className='fade-in';
+  const container=document.getElementById('optionsContainer');
+  container.innerHTML='';container.className='fade-in';
+  // Dynamic options for budget question
+  let opts = q.options;
+  if(q.id==='budget' && q.optionsByDivision){
+    const div = answers.division || 'Série A';
+    opts = q.optionsByDivision[div] || q.optionsByDivision['Série A'];
+  }
+  if(!opts) opts = [];
+  opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='option-card';btn.innerHTML=`<span class="option-num">${i+1}</span><span>${opt.label}</span>`;btn.onclick=()=>selectOption(q,opt,i);container.appendChild(btn)});
+  document.getElementById('btnBack').style.display=currentQ>0?'inline-block':'none';
+}
+
+function selectOption(q,opt,idx){
+  document.querySelectorAll('.option-card').forEach((c,i)=>c.classList.toggle('selected',i===idx));
+  if(q.type==='info'){
+    answers[q.id]=opt.label;
+    if(opt.budgetKey) answers.budgetKey=opt.budgetKey;
+  } else answers[q.id]=opt.score;
+  setTimeout(()=>{if(currentQ<allQuestions.length-1){currentQ++;renderQuestion()}else showResults()},350);
+}
+function goBack(){if(currentQ>0){currentQ--;renderQuestion()}}
+
+function calculateMaturity(){let t=0,m=0;allQuestions.forEach(q=>{if(q.type==='score'){t+=(answers[q.id]||0);m+=3}});const p=t/m;if(p<.15)return 1;if(p<.35)return 2;if(p<.55)return 3;if(p<.80)return 4;return 5}
+
+function getPillarScores(){const p={};allQuestions.forEach(q=>{if(q.type!=='score')return;if(!p[q.pillar])p[q.pillar]={total:0,max:0,color:q.pillarColor};p[q.pillar].total+=(answers[q.id]||0);p[q.pillar].max+=3});return p}
+
+function getBudgetData(){const k=answers.budgetKey||'C';if(k==='A')return{label:'Faixa A',direct:'R$ 13,7 mi',roi:'5,9x',saving:'R$ 4,1 mi',cost:'R$ 390 mil',isBase:false};if(k==='B')return{label:'Faixa B',direct:'R$ 7,7 mi',roi:'3,9x',saving:'R$ 2,7 mi',cost:'R$ 220 mil',isBase:false};if(k==='base')return{label:'Categorias de Base',direct:'—',roi:'—',saving:'—',cost:'~R$ 750',isBase:true};return{label:'Faixa C',direct:'R$ 3,2 mi',roi:'3,2x',saving:'R$ 1,3 mi',cost:'R$ 90 mil',isBase:false}}
+
+function getPillarRec(name,pct){const r=pillarRecs[name];if(!r)return'';if(pct<.34)return r.low;if(pct<.67)return r.mid;return r.high}
+
+function showResults(){
+  showScreen('results');
+  const level=calculateMaturity(),mat=maturityLevels[level-1],pillars=getPillarScores(),budget=getBudgetData(),evo=maturityEvolution[level];
+
+  let gaugeBars='';
+  maturityLevels.forEach((ml,i)=>{const isA=i<level,isC=i===level-1,h=40+i*18,w=isC?56:44;
+    gaugeBars+=`<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="gauge-bar" style="width:${w}px;height:${h}px;background:${isA?ml.color:'var(--dark3)'};border:${isC?'2px solid '+ml.color:'none'};box-shadow:${isC?'0 0 20px '+ml.color+'44':'none'}"></div><span class="gauge-label" style="color:${isA?ml.color:'var(--subtle)'};font-weight:${isC?700:400};font-size:${isC?13:11}px">${ml.level}</span></div>`});
+
+  let pillarHTML='',delay=0;
+  for(const[name,data]of Object.entries(pillars)){const pct=data.total/data.max,pctR=Math.round(pct*100),rec=getPillarRec(name,pct);
+    const bg=pct<.34?'rgba(231,76,60,.08)':pct<.67?'rgba(241,196,15,.08)':'rgba(39,174,96,.08)';
+    const bc=pct<.34?'#E74C3C':pct<.67?'#F1C40F':'#27AE60';
+    pillarHTML+=`<div class="pillar-row"><div class="pillar-header"><span style="color:${data.color}">${name}</span><span style="color:var(--subtle)">${pctR}%</span></div><div class="pillar-bar-bg"><div class="pillar-bar-fill" style="width:0%;background:${data.color}" data-target="${pctR}" data-delay="${delay}"></div></div><div class="pillar-rec" style="background:${bg};border-left-color:${bc};color:var(--text)">${rec}</div></div>`;delay+=150}
+
+  const evoC=level<5?maturityLevels[level].color:'#2E86DE';
+  const evoHTML=`<div class="evolution-box" style="border-color:${evoC}44;background:${evoC}0A"><div style="font-weight:700;color:${evoC};margin-bottom:8px">${level<5?'Para evoluir ao '+evo.next:'Seu clube é referência'}</div><div style="color:var(--text)">${evo.suggestion}</div></div>`;
+
+  const recsForLevel={
+    1:["Mapear o estado atual e definir profissional responsável.","Avaliar fornecedores de vestíveis e simular custo-benefício.","Sensibilizar a diretoria com dados econômicos do GIDV.","Buscar parcerias com federações ou patrocinadores."],
+    2:["Formalizar protocolo de coleta diária em treinos e jogos.","Construir dashboard básico com ACWR, distância e HSR.","Designar profissional dedicado à análise de dados.","Iniciar comunicação regular com a comissão técnica."],
+    3:["Integrar fontes complementares: bioquímica, wellness, vídeo.","Formalizar protocolo de comunicação interdisciplinar.","Iniciar mensuração de disponibilidade e custo de lesões.","Individualizar limiares de risco por atleta."],
+    4:["Explorar modelos preditivos para antecipar risco individual.","Calcular e reportar ROI à diretoria como indicador de gestão.","Compartilhar aprendizados e benchmark com outros clubes.","Registrar decisões baseadas em dados e avaliar eficácia."],
+    5:["Investir em biofeedback em tempo real e ML mais robusto.","Publicar resultados e contribuir para o avanço do setor.","Automatizar ciclo dado → insight → ação → aprendizado.","Apoiar evolução de clubes menores na curva de maturidade."],
+  };
+  let recsHTML='';recsForLevel[level].forEach((r,i)=>{recsHTML+=`<div class="rec-item"><span class="rec-num" style="background:rgba(39,174,96,.15);color:#27AE60">${i+1}</span><p class="rec-text">${r}</p></div>`});
+
+  document.getElementById('resultsContent').innerHTML=`
+    <div style="text-align:center;margin-bottom:36px" class="fade-in">
+      <div class="tag" style="background:${mat.color}22;color:${mat.color};margin-bottom:12px">RESULTADO DO DIAGNÓSTICO</div>
+      <h1 style="font-size:28px;margin:8px 0">Nível <span style="color:${mat.color}">${level}</span> — ${mat.name}</h1>
+      <p style="color:var(--subtle);font-size:14px">${mat.subtitle}</p>
+    </div>
+    <div class="result-card fade-in">
+      <div class="result-card-title">Escala de Maturidade GIDV</div>
+      <div class="gauge">${gaugeBars}</div>
+      <p style="font-size:13px;color:var(--subtle);text-align:center;margin-top:16px;line-height:1.6">${mat.desc}</p>
+      ${evoHTML}
+    </div>
+    <div class="result-card fade-in">
+      <div class="result-card-title">Diagnóstico por Pilar</div>
+      ${pillarHTML}
+    </div>
+    <div class="result-card fade-in">
+      <div class="result-card-title">Projeção Econômica — ${budget.label}</div>
+      ${budget.isBase ? `
+      <div style="padding:16px;border-radius:10px;background:rgba(46,134,222,0.08);border:1px solid rgba(46,134,222,0.2);margin-bottom:16px">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:8px;font-size:14px">Impacto nas categorias de base</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text)">Nas categorias de base, o custo salarial direto por lesão é baixo (atletas recebem em média R$ 1.500 a R$ 5.000/mês em bolsa ou primeiro contrato). Porém, o impacto real de uma lesão na base é de outra natureza:</p>
+      </div>
+      <div class="econ-grid">
+        <div class="econ-card" style="border:1px solid #E74C3C33"><div class="econ-title"><span style="color:#E74C3C">⚠</span> Custo direto por lesão</div><div class="econ-label">Remuneração média em afastamento (15 dias)</div><div class="econ-value" style="color:#E74C3C">${budget.cost}</div></div>
+        <div class="econ-card" style="border:1px solid #E67E2233"><div class="econ-title"><span style="color:#E67E22">📊</span> Perda de formação</div><div class="econ-label">Treinos, jogos e torneios perdidos</div><div class="econ-value" style="color:#E67E22;font-size:16px">Imensurável</div></div>
+      </div>
+      <div class="econ-grid">
+        <div class="econ-card" style="border:1px solid #8E44AD33"><div class="econ-title"><span style="color:#8E44AD">🎯</span> Vitrine perdida</div><div class="econ-label">Copinha, torneios de base, olheiros</div><div class="econ-value" style="color:#8E44AD;font-size:16px">Oportunidade única</div></div>
+        <div class="econ-card" style="border:1px solid #27AE6033"><div class="econ-title"><span style="color:#27AE60">💰</span> Valor de mercado</div><div class="econ-label">Um jovem promissor pode valer</div><div class="econ-value" style="color:#27AE60">R$ 1-5 mi</div></div>
+      </div>
+      <p style="font-size:13px;color:var(--text);margin-top:16px;line-height:1.6;padding:12px;background:rgba(39,174,96,0.08);border-radius:8px;border-left:3px solid var(--green)">Para clubes formadores, prevenir lesões é proteger o principal ativo do clube: o atleta em desenvolvimento. Uma única venda de jogador formado na base pode representar a principal receita do clube na temporada.</p>
+      <p style="font-size:11px;color:var(--subtle);margin-top:14px;font-style:italic">Nota: Valores de remuneração baseados em dados da CBF e levantamentos salariais de categorias de base (2024-2025). Atletas sub-15 recebem bolsa auxílio de R$ 300-500/mês; sub-17 de R$ 800-1.200/mês; sub-20 de R$ 1.500-8.000/mês dependendo do clube.</p>
+      ` : `
+      <div class="econ-grid">
+        <div class="econ-card" style="border:1px solid #E74C3C33"><div class="econ-title"><span style="color:#E74C3C">⚠</span> Custo por lesão</div><div class="econ-label">Média (salário em afastamento)</div><div class="econ-value" style="color:#E74C3C">${budget.cost}</div></div>
+        <div class="econ-card" style="border:1px solid #E67E2233"><div class="econ-title"><span style="color:#E67E22">📊</span> Custo total/temporada</div><div class="econ-label">35 lesões × custo médio</div><div class="econ-value" style="color:#E67E22">${budget.direct}</div></div>
+      </div>
+      <div class="econ-grid">
+        <div class="econ-card" style="border:1px solid #27AE6033"><div class="econ-title"><span style="color:#27AE60">💰</span> Economia potencial</div><div class="econ-label">Cenário otimista (-25% lesões)</div><div class="econ-value" style="color:#27AE60">${budget.saving}</div></div>
+        <div class="econ-card" style="border:1px solid #2E86DE33"><div class="econ-title"><span style="color:#2E86DE">📈</span> ROI estimado</div><div class="econ-label">Retorno por R$1 investido</div><div class="econ-value" style="color:#2E86DE">${budget.roi}</div></div>
+      </div>
+      <p style="font-size:11px;color:var(--subtle);margin-top:14px;font-style:italic">Fonte: Dados do Brasileirão Série A (2019-2025). Premissa: 15 dias de afastamento médio/lesão.${answers.division&&!answers.division.includes('Série A')?' Os valores acima são referências da Série A. Para o contexto do seu clube na '+answers.division+', os valores absolutos serão proporcionalmente menores, mas a lógica do modelo (reduzir lesões = economia + performance) se aplica da mesma forma.':''}</p>
+      `}
+    </div>
+    <div class="result-card fade-in" style="border-color:#27AE6033">
+      <div class="result-card-title" style="color:#27AE60">Próximos Passos Recomendados</div>
+      ${recsHTML}
+    </div>
+    <div class="final-box fade-in" style="background:linear-gradient(135deg,rgba(46,134,222,.12),rgba(39,174,96,.12));border:1px solid rgba(46,134,222,.2)">
+      <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px">Este diagnóstico faz parte do modelo GIDV</div>
+      <p style="font-size:13px;color:var(--subtle);line-height:1.6">Desenvolvido como parte da tese de doutorado de Davi Feques Vale (CESAR School), o GIDV propõe um framework baseado em evidências para integrar tecnologias vestíveis à gestão do futebol profissional.</p>
+      <p style="font-size:12px;color:var(--subtle);margin-top:10px">Contato: davi.vale@cesar.school | davifeva@gmail.com</p>
+    </div>
+    <button class="btn-primary" onclick="startDiagnostic()" style="margin-bottom:12px">Refazer diagnóstico</button>
+    <button class="btn-secondary" onclick="window.print()" style="width:100%;text-align:center">Imprimir / Salvar como PDF</button>
+    <div style="height:40px"></div>`;
+
+  setTimeout(()=>{document.querySelectorAll('.pillar-bar-fill').forEach(bar=>{setTimeout(()=>{bar.style.width=bar.dataset.target+'%'},parseInt(bar.dataset.delay))})},400);
+}
+</script>
+</body>
+</html>
