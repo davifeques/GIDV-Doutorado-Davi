@@ -37,7 +37,7 @@ O modelo GIDV foi construído a partir de:
 
 Acesse diretamente pelo navegador:
 
-**🔗 [Link do diagnóstico](https://davifeques.github.io/GIDV-Doutorado-Davi/))**
+**🔗 [Link do diagnóstico](https://davifeques.github.io/GIDV-Doutorado-Davi/)**
 
 Não é necessário instalar nada. Funciona em qualquer navegador (desktop ou celular). As respostas não são armazenadas.
 
