@@ -197,7 +197,7 @@ function calculateMaturity(){let t=0,m=0;allQuestions.forEach(q=>{if(q.type==='s
 
 function getPillarScores(){const p={};allQuestions.forEach(q=>{if(q.type!=='score')return;if(!p[q.pillar])p[q.pillar]={total:0,max:0,color:q.pillarColor};p[q.pillar].total+=(answers[q.id]||0);p[q.pillar].max+=3});return p}
 
-function getBudgetData(){const k=answers.budgetKey||'C';if(k==='A')return{label:'Faixa A',direct:'R$ 13,7 mi',roi:'5,9x',saving:'R$ 4,1 mi',cost:'R$ 390 mil',isBase:false};if(k==='B')return{label:'Faixa B',direct:'R$ 7,7 mi',roi:'3,9x',saving:'R$ 2,7 mi',cost:'R$ 220 mil',isBase:false};if(k==='base')return{label:'Categorias de Base',direct:'—',roi:'—',saving:'—',cost:'~R$ 750',isBase:true};return{label:'Faixa C',direct:'R$ 3,2 mi',roi:'3,2x',saving:'R$ 1,3 mi',cost:'R$ 90 mil',isBase:false}}
+function getBudgetData(){const k=answers.budgetKey||'C';if(k==='A')return{label:'Faixa A',direct:'R$ 12,5 mi',roi:'7,1x',saving:'R$ 5,0 mi',cost:'R$ 700 mil',isBase:false};if(k==='B')return{label:'Faixa B',direct:'R$ 6,9 mi',roi:'4,7x',saving:'R$ 3,3 mi',cost:'R$ 700 mil',isBase:false};if(k==='base')return{label:'Categorias de Base',direct:'—',roi:'—',saving:'—',cost:'~R$ 750',isBase:true};return{label:'Faixa C',direct:'R$ 2,8 mi',roi:'4,5x',saving:'R$ 1,8 mi',cost:'R$ 400 mil',isBase:false}}
 
 function getPillarRec(name,pct){const r=pillarRecs[name];if(!r)return'';if(pct<.34)return r.low;if(pct<.67)return r.mid;return r.high}
 
